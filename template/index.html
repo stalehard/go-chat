@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat Example</title>
+    <script type="text/javascript">
+        window.onload = function () {
+            var conn;
+            var msg = document.getElementById("msg");
+            var name = document.getElementById("name");
+            var log = document.getElementById("history");
+            var users = document.getElementById("users");
+            function appendLog(item) {
+                var doScroll = log.scrollTop === log.scrollHeight - log.clientHeight;
+                log.appendChild(item);
+                if (doScroll) {
+                    log.scrollTop = log.scrollHeight - log.clientHeight;
+                }
+            }
+            function updateUsersList(html) {
+                users.innerHTML = html;
+            }
+            document.getElementById("form").onsubmit = function () {
+                if (!conn) {
+                    return false;
+                }
+
+                var data = {
+                    name: name.value,
+                    text: msg.value
+                };
+                conn.send(JSON.stringify(data));
+                msg.value = "";
+                return false;
+            };
+            if (window["WebSocket"]) {
+                conn = new WebSocket("ws://{{$}}/ws");
+                conn.onclose = function (evt) {
+                    var item = document.createElement("div");
+                    item.innerHTML = "<b>Connection closed.</b>";
+                    appendLog(item);
+                };
+                conn.onmessage = function (evt) {
+                    console.log(evt.data)
+
+                    try {
+                        var msg = JSON.parse(evt.data);
+
+                        if (msg.Type == 0) {
+                            var item = document.createElement("div");
+                            item.innerHTML = "<span style='color:#00FF00'>" + msg.Time + "</span> " +
+                                "<span style='color:#FF0000'>" + msg.Name + ":</span> " +
+                                "<span>" + msg.Text + "</span>";
+                            appendLog(item);
+
+                            var html = "";
+                            if (msg.Users.length>0) {
+                                msg.Users.forEach(function(user) {
+                                    html += "<div>" + user + "</div>"
+                                });
+                                updateUsersList(html);
+                            }
+
+                        } else if (msg.Type == 1) {
+                            var html = "";
+                            if (msg.Users.length>0) {
+                                msg.Users.forEach(function(user) {
+                                    html += "<div>" + user + "</div>"
+                                });
+                                updateUsersList(html);
+                            }
+                        } else if (msg.Type == 10) {
+                            alert(msg.Text);
+                        }
+                    }   catch(err) {
+                        console.log("error parse json", err);
+                    }
+                };
+            } else {
+                var item = document.createElement("div");
+                item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+                appendLog(item);
+            }
+        };
+    </script>
+    <style type="text/css">
+        html {
+            overflow: hidden;
+        }
+        body {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: gray;
+        }
+        #log {
+            background: white;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            top: 0.5em;
+            left: 0.5em;
+            right: 0.5em;
+            bottom: 3em;
+            overflow: auto;
+        }
+        #history {
+            height: 100%;
+            width: 80%;
+        }
+        #users {
+            border-left: solid;
+            position: fixed;
+            height: 94%;
+            width: 19%;
+            right: 0.5em;
+            top: 0.5em;
+        }
+        #form {
+            padding: 0 0.5em 0 0.5em;
+            margin: 0;
+            position: absolute;
+            bottom: 1em;
+            left: 0px;
+            width: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div id="log">
+    <div id="history"></div>
+    <div id="users"></div>
+</div>
+<form id="form">
+    <input type="submit" value="Send" />
+    <input type="text" id="name" size="32" placeholder="Name ..."/>
+    <input type="text" id="msg" size="64"placeholder="Text ..."/>
+</form>
+</body>
+</html>
