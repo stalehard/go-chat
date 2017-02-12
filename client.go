@@ -12,7 +12,6 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/websocket"
-	"github.com/stalehard/chat/message"
 )
 
 const (
@@ -76,7 +75,7 @@ func (c *Client) readPump() {
 			break
 		}
 		rawMsg = bytes.TrimSpace(bytes.Replace(rawMsg, newline, space, -1))
-		if msg, err := message.NewMessage(rawMsg); err != nil {
+		if msg, err := NewMessage(rawMsg); err != nil {
 			log.Println("invalid message", err)
 
 			if str, err := json.Marshal(msg); err != nil {

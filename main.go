@@ -4,8 +4,6 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-
-	"github.com/stalehard/chat/config"
 )
 
 var indexTemplate = template.Must(template.ParseFiles("template/index.html"))
@@ -24,7 +22,7 @@ func serveStatic(w http.ResponseWriter, r *http.Request) {
 }
 
 func main()  {
-	conf, err := config.ReadConfig("config/config.json")
+	conf, err := ReadConfig("config/config.json")
 	if err != nil {
 		log.Fatal("Read config error:", err)
 	}

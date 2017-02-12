@@ -7,8 +7,6 @@ package main
 import (
 	"log"
 	"encoding/json"
-
-	"github.com/stalehard/chat/message"
 )
 
 type SingleChannelMsg struct {
@@ -54,7 +52,7 @@ func (h *Hub) run() {
 			for c := range h.clients {
 				users = append(users, h.clients[c])
 			}
-			usersList := message.ServerUserList{users, 1}
+			usersList := ServerUserList{users, 1}
 
 			if str, err := json.Marshal(usersList); err != nil {
 				log.Println("error: v%", err)
@@ -79,7 +77,7 @@ func (h *Hub) run() {
 				for c := range h.clients {
 					users = append(users, h.clients[c])
 				}
-				usersList := message.ServerUserList{users, 1}
+				usersList := ServerUserList{users, 1}
 
 				if str, err := json.Marshal(usersList); err != nil {
 					log.Println("error: v%", err)
